@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+.venv/
+
+# ChromaDB
+vector_db/
+
+# Generated Reports
+reports/*.pdf
+reports/*.md
+reports/*.json
+reports/*.png
+
+# Environment
+.env
+
+# VSCode
+.vscode/
+
+# Logs
+*.log

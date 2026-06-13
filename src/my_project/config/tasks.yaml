@@ -1,0 +1,316 @@
+investigation_task:
+  description: >
+    Analyze the uploaded case document.
+
+    Case Details:
+
+    {case_text}
+
+    Extract only information that explicitly appears
+    in the uploaded document.
+
+
+    Every finding must contain:
+
+    - Finding
+    - Evidence Quote
+    - Source Page
+    - Confidence Level (High/Medium/Low)
+
+    Extract:
+
+    - Timeline of events
+    - Witness statements
+    - Physical evidence
+    - Financial evidence
+    - Contradictions
+    - Key observations
+
+    Rules:
+
+    - Do NOT invent facts.
+    - Do NOT infer missing information.
+    - Do NOT use outside legal knowledge.
+    - Every finding must include a source page.
+    - If information is unavailable, explicitly state
+      "Not Found in Document".
+
+  expected_output: >
+    A detailed markdown evidence report containing:
+
+    # Case Summary
+
+    # Timeline of Events
+
+    # Witness Statements
+
+    # Physical Evidence
+
+    # Financial Evidence
+
+    # Contradictions
+
+    # Key Observations
+
+    Each item must contain:
+    - Evidence Quote
+    - Source Page
+    - Confidence Score
+
+  agent: investigator
+
+  output_file: reports/evidence_report.md
+
+
+defense_task:
+  description: >
+    Review the investigator report.
+
+    Build the strongest possible defense argument.
+
+    Rules:
+
+    - Use ONLY evidence from the investigator report.
+    - Cite source pages for every argument.
+    - Do NOT introduce new facts.
+    - Do NOT invent evidence.
+    - Do NOT reference laws not mentioned in the document.
+
+    Focus on:
+
+    - Reasonable doubt
+    - Weak evidence
+    - Contradictions
+    - Missing proof
+    - Alternative explanations
+    - Procedural concerns
+
+  context:
+    - investigation_task
+
+  expected_output: >
+    A markdown defense report containing:
+
+    # Case Summary
+
+    # Defense Arguments
+
+    # Evidence Analysis
+
+    # Weaknesses in Prosecution Case
+
+    # Conclusion
+
+    Every argument must contain:
+    - Supporting Evidence
+    - Source Page
+
+  agent: defense_lawyer
+
+  output_file: reports/defense_report.md
+
+
+prosecution_task:
+  description: >
+    Review the investigator report.
+
+    Build the strongest possible prosecution case.
+
+    Rules:
+
+    - Use ONLY evidence from the investigator report.
+    - Cite source pages for every claim.
+    - Do NOT invent facts.
+    - Do NOT create witness statements not found in evidence.
+    - Do NOT introduce external legal knowledge.
+
+    Focus on:
+
+    - Motive
+    - Opportunity
+    - Supporting evidence
+    - Witness credibility
+    - Logical connections
+
+  context:
+    - investigation_task
+
+  expected_output: >
+    A markdown prosecution report containing:
+
+    # Case Summary
+
+    # Evidence Presented
+
+    # Witness Statements
+
+    # Motive Analysis
+
+    # Prosecution Argument
+
+    # Conclusion
+
+    Every claim must contain:
+    - Supporting Evidence
+    - Source Page
+
+  agent: prosecutor
+
+  output_file: reports/prosecution_report.md
+
+
+contradiction_task:
+  description: >
+    Review the investigator report.
+
+    Find:
+
+    - Timeline conflicts
+    - Witness inconsistencies
+    - Unsupported claims
+    - Evidence conflicts
+    - Missing evidence
+
+    Rules:
+
+    - Use only investigator findings.
+    - Cite source pages.
+    - Do not invent contradictions.
+
+  context:
+    - investigation_task
+
+  expected_output: >
+    A markdown contradiction report containing:
+
+    # Timeline Contradictions
+
+    # Witness Contradictions
+
+    # Unsupported Claims
+
+    # Missing Evidence
+
+    # Risk Assessment
+
+  agent: contradiction_analyst
+
+  output_file: reports/contradiction_report.md
+
+
+knowledge_graph_task:
+  description: >
+    Review the investigator report.
+    Extract entities and relationships from the evidence.
+
+    Identify entities from:
+
+    - Victims
+    - Accused Persons
+    - Witnesses
+    - Organizations
+    - Locations
+    - Physical Evidence
+    - Financial Evidence
+
+    Create relationships between entities whenever
+    they are explicitly supported by evidence.
+
+    Allowed relationship types:
+
+    - Witnessed
+    - Accused
+    - Reported
+    - Owned
+    - Transferred
+    - Located At
+    - Connected To
+
+    Rules:
+
+    - Use ONLY investigator findings.
+    - Do NOT invent entities.
+    - Do NOT invent relationships.
+    - Do NOT add explanations.
+    - Do NOT add markdown.
+    - Do NOT add headings.
+    - Do NOT add notes.
+    - Do NOT add code fences.
+    - Output ONLY raw JSON.
+    - Response MUST start with {
+    - Response MUST end with }
+
+    If no relationships are found,
+    return an empty relationships array.
+    
+  context:
+    - investigation_task
+  expected_output: >
+    ONLY valid JSON in exactly this format:
+    {
+      "entities": [
+        "Entity A",
+        "Entity B"
+      ],
+      "relationships": [
+        {
+          "source": "Entity A",
+          "target": "Entity B",
+          "type": "Connected To"
+        }
+      ]
+    }
+  agent: knowledge_graph_agent
+  output_file: reports/knowledge_graph.json
+
+judgement_task:
+  description: >
+    Review:
+    - Investigator Report
+    - Defense Report
+    - Prosecution Report
+    - Contradiction Report
+
+    Evaluate only the information contained in those reports.
+
+    Rules:
+    - Do NOT use outside legal knowledge.
+    - Do NOT introduce new evidence.
+    - Do NOT reference laws not present in the case file.
+    - Base conclusions only on cited evidence.
+    - Identify unsupported claims made by either side.
+
+    Determine:
+    - Strength of evidence
+    - Reliability of witnesses
+    - Presence of contradictions
+    - Whether conclusions are supported by evidence
+  context:
+    - investigation_task
+    - defense_task
+    - prosecution_task
+    - contradiction_task
+  expected_output: >
+    A markdown judgement containing:
+    # Summary of Evidence
+    
+    # Defense Evaluation
+    
+    # Prosecution Evaluation
+    
+    # Contradiction Analysis
+    
+    # Unsupported Claims
+    
+    # Strengths and Weaknesses
+    
+    # Final Verdict
+    
+    # Judicial Reasoning
+
+    Every conclusion must reference:
+    - Supporting Evidence
+    - Source Page
+  agent: judge
+  output_file: reports/judgement.md
+  
